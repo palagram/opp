@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Wallet UI – Demo</title>
+<style>
+  :root{
+    --bg:#f7f9fb;
+    --ink:#1d1d1f;
+    --primary:#02b17a;
+    --primary-ink:#066a4c;
+    --primary-soft:#e6f7f1;
+    --card:#ffffff;
+    --ring:rgba(0,0,0,.08);
+    --shadow:0 8px 24px rgba(3, 130, 92, .15);
+    --error:#e74c3c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family: 'Poppins', sans-serif;background:var(--bg);color:var(--ink)}
+  .app{max-width:430px;margin:auto;display:flex;flex-direction:column;}
+
+  /* HEADER */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px 8px}
+  .greet{font-size:17px;font-weight:700}
+  .login-btn{
+    border:2px solid var(--primary);
+    color:var(--primary);
+    background:#fff;
+    padding:8px 16px;
+    border-radius:999px;
+    font-weight:700;
+    margin-left: 5px;
+    transition:.3s;
+  }
+  .login-btn:hover{background:var(--primary-soft)}
+  .user-name{font-size:20px;font-weight:700;color:var(--primary-ink)}
+
+  /* BALANCE */
+  .balance{margin:8px 16px;background:var(--primary);color:#fff;border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+  .balance-top{display:flex;justify-content:space-between;font-weight: 500;font-size: 14px;margin-bottom:12px}
+  .balance-mid{display:flex;align-items:center;justify-content:space-between}
+  .balance-left{display:flex;align-items:center;gap:12px}
+  .balance-amount{font-size:26px;font-weight:bold}
+  .eye{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.08)}
+  .eye svg{width:18px;height:18px;fill:#fff}
+  .add-money{background:#fff;color:var(--primary-ink);border:none;padding:7px 15px;font-family: 'Poppins', sans-serif;border-radius:50px;font-weight:500;transition:.2s}
+  .add-money:hover{background:var(--primary-soft)}
+
+  /* TRANSFER OPTIONS */
+  .transfer-options{
+    margin:16px;
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+  }
+  .option-card{
+    flex:;
+    background:#fff;
+    border-radius:16px;
+    padding:15px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+    transition:.25s;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  .option-card:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,.08);}
+  .option-icon{
+    width:40px;height:40px;
+    margin:0 auto 10px;
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;
+  }
+  .option-text{font-weight: 500;
+color: var(--ink);font-size:13px;}
+
+  /* GENERIC MODAL */
+  .overlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;z-index:999;
+    padding-top:40px;
+  }
+  .modal{
+    position:relative;
+    background:#fff;padding:22px;border-radius:14px;width:92%;max-width:420px;
+    margin:0 16px;box-shadow:var(--shadow);animation:slideDown .32s ease;
+  }
+  @keyframes slideDown{from{transform:translateY(-22px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal h2{margin-top:0;color:var(--primary-ink);text-align:center}
+  .close{position:absolute;right:12px;top:8px;font-size:22px;font-weight:700;color:#666}
+  .close:hover{color:var(--error)}
+  .modal label{display:block;margin:12px 0 6px;font-weight:600;color:var(--primary-ink)}
+  .modal input,.modal select{
+    width:100%;padding:12px;border:2px solid var(--ring);
+    font-family: 'Poppins', sans-serif;
+    border-radius:10px;font-size:15px;transition:.2s;outline:none;
+  }
+  .modal input:focus,.modal select:focus{border-color:var(--primary);box-shadow:0 0 0 6px rgba(2,177,122,0.08)}
+  .modal button{
+    margin-top:25px;width:100%;padding:12px;background:var(--primary);
+    font-family: 'Poppins', sans-serif;
+    color:#fff;border:none;border-radius:50px;font-weight:700;
+    transition:.2s;font-size:16px;
+  }
+  .modal button:hover{background:var(--primary-ink)}
+
+  /* TRANSACTION CARD */
+  .transaction-card{
+    background:var(--primary-soft);
+    border-left:6px solid var(--primary);
+    padding:14px;
+    border-radius:12px;
+    margin-top:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,.06);
+  }
+  .transaction-amount{font-size:20px;font-weight:700;color:var(--primary-ink)}
+  .transaction-detail{font-size:12px;font-weight:500;color:var(--ink);margin-top:6px}
+
+  /* TOASTS */
+  .max-popup, .login-popup{
+    position:fixed;top:60px;left:-100%;
+    color:#fff;
+    padding:12px 18px;border-radius:12px;font-weight:500;
+    box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:1100;white-space:nowrap;
+    font-size: 12px;
+  }
+  .max-popup{background:#ff4757;}
+  .login-popup{background:#595959;}
+  .toast-show{animation:slideToast 2s ease forwards;}
+  @keyframes slideToast {
+    0% { left:-100%; opacity:0; transform:translateX(0); }
+    10% { left:50%; transform:translateX(-50%); opacity:1; }
+    70% { left:50%; transform:translateX(-50%); opacity:1; }
+    100% { left:120%; opacity:0; transform:translateX(0); }
+  }
+  input.error, select.error {
+  border: 2px solid red !important;
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+}
+/* SERVICES CONTAINER */
+.services-container {
+  margin: 16px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.05);
+}
+
+.service-card {
+  text-align: center;
+  transition: .25s;
+}
+
+.service-card:hover { transform: translateY(-3px); }
+
+.service-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  margin: 0 auto 8px;
+  background: var(--primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-icon img {
+  width: 26px;
+  height: 26px;
+}
+
+.service-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+</style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <div class="topbar">
+     <div class="topbar">
+  <img src="op.jpeg" alt="User Avatar" class="avatar">
+  <div class="greet">Hi, <span id="user-name"></span></div>
+  <button class="login-btn" id="loginBtn">Login</button>
+</div>
+</div>
+
+    <!-- BALANCE -->
+    <section class="balance">
+      <div class="balance-top">
+        <div>Available Balance</div>
+        <div id="historyBtn">Transaction History ▸</div>
+      </div>
+      <div class="balance-mid">
+        <div class="balance-left">
+          <div class="balance-amount" id="balance">₦0</div>
+          <div class="eye" id="eye" title="Toggle balance">
+            <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M12 5c-7.633 0-11 7-11 7s3.367 7 11 7 11-7 11-7-3.367-7-11-7zm0 12c-2.757 0-5-2.243-5-5 
+                       0-2.757 2.243-5 5-5s5 2.243 5 5c0 2.757-2.243 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z"/>
+            </svg>
+            <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none">
+              <path d="M2 2l20 20-1.4 1.4L16 16.8C14.5 17.6 13 18 12 18c-7.633 0-11-7-11-7 .9-1.8 2.6-3.8 5.4-5.4L.6 3.4 2 2z"/>
+            </svg>
+          </div>
+        </div>
+        <button class="add-money" id="addMoneyBtn">+ Add Money</button>
+      </div>
+    </section>
+
+    <!-- SECOND CONTAINER -->
+    <section class="transfer-options">
+      <div class="option-card" id="toOpay">
+        <div class="option-icon" style="background:#02b17a1a;">💳</div>
+        <div class="option-text">To OPay</div>
+      </div>
+      <div class="option-card" id="toBank">
+        <div class="option-icon" style="background:#3498db1a;">🏦</div>
+        <div class="option-text">To Bank</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="close" id="closeBtn">&times;</div>
+      <h2>Login</h2>
+      <label>Email</label>
+      <input type="email" id="email" placeholder="Enter your email" required>
+      <label>Name</label>
+      <input type="text" id="name" placeholder="Enter your name" required>
+      <button id="submitLogin">Login</button>
+    </div>
+  </div>
+
+  <!-- TRANSACTION MODAL -->
+  <div class="overlay" id="historyOverlay">
+    <div class="modal">
+      <div class="close" id="closeHistory">&times;</div>
+      <h2 style="font-size: 15px;;">Transactions</h2>
+      <div class="transaction-card">
+        <div class="transaction-amount">+ ₦100,000</div>
+        <div class="transaction-detail" id="transactionTime"></div>
+        <div class="transaction-detail">Sender: Bank Transfer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TO OPAY MODAL -->
+  <div class="overlay" id="opayOverlay">
+    <div class="modal">
+      <div class="close" id="closeOpay">&times;</div>
+      <h2>Send to Opay</h2>
+      <label>Name</label>
+      <input type="text" id="opayName" placeholder="Recipient Name" required>
+      <label>Number</label>
+      <input type="text" id="opayNumber" placeholder="Opay Number" required>
+      <button id="opayContinue">Continue</button>
+    </div>
+  </div>
+
+  <!-- TO BANK MODAL -->
+  <div class="overlay" id="bankOverlay">
+    <div class="modal">
+      <div class="close" id="closeBank">&times;</div>
+      <h2>Send to Bank</h2>
+      <label>Account Name</label>
+      <input type="text" id="bankAccName" placeholder="Account Name" required>
+      <label>Account Number</label>
+      <input type="text" id="bankAccNumber" placeholder="Account Number" required>
+      <label>Bank</label>
+      <select id="bankSelect" required>
+        <option value="">Select Bank</option>
+        <option>Access Bank</option>
+        <option>GTBank</option>
+        <option>Zenith Bank</option>
+        <option>UBA</option>
+        <option>First Bank</option>
+        <option>Fidelity Bank</option>
+        <option>Union Bank</option>
+      </select>
+      <button id="bankContinue">Continue</button>
+    </div>
+  </div>
+<!-- LAST CONTAINER -->
+<section class="services-container">
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/airtime.svg" alt="Airtime"></div>
+    <div class="service-label" >Airtime</div>
+  </div>
+  <div class="service-card" id="myAlert">
+    <div class="service-icon" id="myAlert"><img src="icons/data.svg" alt="Data"></div>
+    <div class="service-label">Data</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/spend-save.svg" alt="Spend & Save"></div>
+    <div class="service-label">Spend & Save</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/electricity.svg" alt="Electricity"></div>
+    <div class="service-label">Electricity</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/financial.svg" alt="Financial"></div>
+    <div class="service-label">Financial</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/invite.svg" alt="Invitation"></div>
+    <div class="service-label">Invitation</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/invite.svg" alt="Invitation"></div>
+    <div class="service-label">Invitation</div>
+  </div>
+  <div class="service-card">
+    <div class="service-icon" id="myAlert"><img src="icons/more.svg" alt="More"></div>
+    <div class="service-label">More</div>
+  </div>
+</section>
+  <!-- TOASTS -->
+  <div class="max-popup" id="maxPopup">🚫 Max Reached</div>
+  <div class="login-popup" id="loginPopup">🔑 Login to add money</div>
+<div class="login-popup" id="loginHistoryPopup">🔑 Login to view transactions</div>
+<div class="login-popup" id="loginTransferPopup">🔑 Login to use</div>
+<script>
+  const loginBtn=document.getElementById("loginBtn");
+const overlay=document.getElementById("overlay");
+const closeBtn=document.getElementById("closeBtn");
+const submitLogin=document.getElementById("submitLogin");
+const userNameSpan=document.getElementById("user-name");
+const balanceEl=document.getElementById("balance");
+const eye=document.getElementById("eye");
+const eyeOpen=document.getElementById("eyeOpen");
+const eyeClosed=document.getElementById("eyeClosed");
+const addMoneyBtn=document.getElementById("addMoneyBtn");
+const historyBtn=document.getElementById("historyBtn");
+const historyOverlay=document.getElementById("historyOverlay");
+const closeHistory=document.getElementById("closeHistory");
+const transactionTime=document.getElementById("transactionTime");
+const maxPopup=document.getElementById("maxPopup");
+const loginPopup=document.getElementById("loginPopup");
+const loginHistoryPopup=document.getElementById("loginHistoryPopup"); 
+const loginTransferPopup=document.getElementById("loginTransferPopup"); 
+
+const toOpay=document.getElementById("toOpay");
+const toBank=document.getElementById("toBank");
+const opayOverlay=document.getElementById("opayOverlay");
+const bankOverlay=document.getElementById("bankOverlay");
+const closeOpay=document.getElementById("closeOpay");
+const closeBank=document.getElementById("closeBank");
+
+let isLoggedIn=false;
+let balance=0;
+let hidden=false;
+
+window.addEventListener("load",()=>{
+  const savedName=localStorage.getItem("name");
+  const savedBalance=localStorage.getItem("balance");
+  if(savedName){
+    userNameSpan.textContent=savedName;
+    loginBtn.style.display="none";
+    isLoggedIn=true;
+  }
+  if(savedBalance) balance=parseInt(savedBalance,10)||0;
+  updateBalance();
+});
+
+loginBtn.addEventListener("click",()=>overlay.style.display="flex");
+closeBtn.addEventListener("click",()=>overlay.style.display="none");
+
+submitLogin.addEventListener("click",()=>{
+  const email=document.getElementById("email");
+  const name=document.getElementById("name");
+  let valid=true;
+  if(email.value.trim()===""){email.classList.add("error");valid=false;} else email.classList.remove("error");
+  if(name.value.trim()===""){name.classList.add("error");valid=false;} else name.classList.remove("error");
+  if(!valid) return;
+  userNameSpan.textContent=name.value;
+  loginBtn.style.display="none";
+  overlay.style.display="none";
+  if(!balance||balance===0) balance=100000;
+  isLoggedIn=true;
+  updateBalance();
+  localStorage.setItem("name",name.value);
+  localStorage.setItem("balance",String(balance));
+});
+
+eye.addEventListener("click",()=>{
+  hidden=!hidden;
+  eyeOpen.style.display=hidden?"none":"block";
+  eyeClosed.style.display=hidden?"block":"none";
+  updateBalance();
+});
+
+function updateBalance(){
+  balanceEl.textContent=hidden?"₦****":"₦"+(isLoggedIn?balance.toLocaleString():"0");
+  localStorage.setItem("balance",String(balance));
+}
+
+addMoneyBtn.addEventListener("click",()=>{
+  if(!isLoggedIn){showLoginPopup();return;}
+  if(balance>=250000){showMaxPopup();return;}
+  balance+=50000;
+  if(balance>250000) balance=250000;
+  updateBalance();
+  localStorage.setItem("balance",String(balance));
+});
+
+historyBtn.addEventListener("click",()=>{
+  if(!isLoggedIn){showHistoryLoginPopup();return;}
+  const now=new Date();
+  transactionTime.textContent="Time: "+now.toLocaleString();
+  historyOverlay.style.display="flex";
+});
+closeHistory.addEventListener("click",()=>historyOverlay.style.display="none");
+
+function showMaxPopup(){
+  maxPopup.classList.remove("toast-show");
+  void maxPopup.offsetWidth; 
+  maxPopup.classList.add("toast-show");
+}
+function showLoginPopup(){
+  loginPopup.classList.remove("toast-show");
+  void loginPopup.offsetWidth; 
+  loginPopup.classList.add("toast-show");
+}
+function showHistoryLoginPopup(){
+  loginHistoryPopup.classList.remove("toast-show");
+  void loginHistoryPopup.offsetWidth;
+  loginHistoryPopup.classList.add("toast-show");
+}
+function showTransferLoginPopup(){
+  loginTransferPopup.classList.remove("toast-show");
+  void loginTransferPopup.offsetWidth;
+  loginTransferPopup.classList.add("toast-show");
+}
+
+// TO OPAY
+toOpay.addEventListener("click",()=>{
+  if(!isLoggedIn){showTransferLoginPopup();return;}
+  opayOverlay.style.display="flex";
+});
+closeOpay.addEventListener("click",()=>opayOverlay.style.display="none");
+
+// TO BANK
+toBank.addEventListener("click",()=>{
+  if(!isLoggedIn){showTransferLoginPopup();return;}
+  bankOverlay.style.display="flex";
+});
+closeBank.addEventListener("click",()=>bankOverlay.style.display="none");
+
+// VALIDATION: OPAY
+document.getElementById("opayContinue").addEventListener("click",()=>{
+  const name=document.getElementById("opayName");
+  const number=document.getElementById("opayNumber");
+  let valid=true;
+  [name,number].forEach(inp=>{
+    if(inp.value.trim()===""){inp.classList.add("error");valid=false;}
+    else inp.classList.remove("error");
+  });
+  if(valid){
+    opayOverlay.style.display="none";
+    alert("✅ Opay transfer submitted!");
+  }
+});
+
+// VALIDATION: BANK
+document.getElementById("bankContinue").addEventListener("click",()=>{
+  const name=document.getElementById("bankAccName");
+  const number=document.getElementById("bankAccNumber");
+  const select=document.getElementById("bankSelect");
+  let valid=true;
+  [name,number,select].forEach(inp=>{
+    if(inp.value.trim()===""){inp.classList.add("error");valid=false;}
+    else inp.classList.remove("error");
+  });
+  if(valid){
+    bankOverlay.style.display="none";
+    alert("✅ Bank transfer submitted!");
+  }
+});
+
+// Close overlay when clicking outside
+document.querySelectorAll(".overlay").forEach(o=>{
+  o.addEventListener("click",e=>{
+    if(e.target===o) o.style.display="none";
+  });
+});
+
+document.getElementById("myAlert").addEventListener("click", ()=>{
+    alert("Clicked!");
+  });
+</script>
+</body>
+</html>
